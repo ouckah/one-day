@@ -39,7 +39,7 @@ export const SideMenu = () => {
                 {/* Nav Buttons */}
                 {
                     options.map((option) => (
-                        <Link className="w-full" href={option.name === "home" ? ("/") : (option.name)}>
+                        <Link className="w-full" href={option.name === "home" ? ("/") : (option.name)} key={option.name}>
                             <button className={((currentRoute === "/" && option.name === "home") || (currentRoute === "/" + option.name)) ? (activeStyle) : (inactiveStyle)}>
                                 {option.icon}
                                 <h1 className='text-white text-xl font-bold uppercase hidden md:inline'>{option.name}</h1>
