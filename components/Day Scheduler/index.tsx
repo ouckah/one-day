@@ -62,33 +62,38 @@ export const DayScheduler = () => {
     // TODO: to reflect the changes on the right side of component.
     const addAppointment = (appointment: { [key: string]: { start: string; end: string } }) => {
         const startTime = Object.keys(appointment)[0]; // Extract the start time from the keys of the appointment object
-      
+        const appointmentContent = appointment[startTime];
+    
         // Update the startTimes array with the new start time
         const updatedStartTimes = [...state.startTimes, startTime];
-      
+    
         // Create a new copy of the appointments object with the new appointment added
         const updatedAppointments = {
-          ...state.appointments,
-          ...appointment,
+            ...state.appointments,
+            ...appointment,
         };
-      
+    
         setState({
-          ...state,
-          appointments: updatedAppointments,
-          startTimes: updatedStartTimes,
+            ...state,
+            appointments: updatedAppointments,
+            startTimes: updatedStartTimes,
         });
 
-        selectAppointment(startTime);
-      };
+        setSelected(appointmentContent);
+    };
 
     const selectAppointment = (key: string) => {
         const appointment = state.appointments[key];
         setSelected(appointment);
     }
+    
+    const clearSelectedAppointment = () => {
+        setSelected({start: '', end: ''});
+    }
 
     useEffect(() => {
-        console.log(selected);
-    }, [selected]);
+        selected ? (selectAppointment(selected.start)) : (null)
+    }, [selected])
 
     return (
         <>
@@ -116,13 +121,13 @@ export const DayScheduler = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col w-1/2 h-full bg-gray-200 rounded-2xl py-3">
+                <div className="flex flex-col justify-start items-start w-1/2 h-full bg-gray-200 rounded-2xl p-3">
                     {
                         selected ? (
                             <>
-                            
-                                <h1>{selected.start}</h1>
-                                <h1>{selected.end}</h1>
+
+                                <button onClick={clearSelectedAppointment}>X</button>
+                                <input className="w-1/2"/>
                             
                             </>
                         ) : (
