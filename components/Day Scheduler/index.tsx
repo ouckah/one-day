@@ -58,8 +58,6 @@ export const DayScheduler = () => {
         }
     }
 
-    // TODO: when a new appointment is added, selected state does not change in time
-    // TODO: to reflect the changes on the right side of component.
     const addAppointment = (appointment: { [key: string]: { start: string; end: string } }) => {
         const startTime = Object.keys(appointment)[0]; // Extract the start time from the keys of the appointment object
         const appointmentContent = appointment[startTime];
@@ -88,7 +86,32 @@ export const DayScheduler = () => {
     }
     
     const clearSelectedAppointment = () => {
+        if (!selected) return;
         setSelected({start: '', end: ''});
+    }
+
+    const deleteSelectedAppointment = () => {
+        if (!selected) return;
+        const appointmentKey = selected.start;
+
+        // delete from appointments
+        let updatedAppointments = state.appointments;
+        delete updatedAppointments[appointmentKey];
+
+        // delete from start times
+        let updatedStartTimes = state.startTimes;
+        const index = updatedStartTimes.indexOf(appointmentKey);
+        updatedStartTimes.splice(index, 1);
+
+        // update state
+        setState({
+            ...state,
+            appointments: updatedAppointments,
+            startTimes: updatedStartTimes
+        });
+
+        // clear selection
+        clearSelectedAppointment();
     }
 
     useEffect(() => {
@@ -126,8 +149,24 @@ export const DayScheduler = () => {
                         selected ? (
                             <>
 
-                                <button onClick={clearSelectedAppointment}>X</button>
-                                <input className="w-1/2"/>
+                                <div className="flex flex-row justify-between items-center w-full h-24">
+                                    <button onClick={clearSelectedAppointment}>X</button>
+                                    <input className="w-1/2 h-12 bg-gray-200 border-b-gray-500 border-b-2 text-gray-500 text-lg font-bold p-3 focus:outline-none"/>
+                                    <button onClick={deleteSelectedAppointment}>Delete</button>
+                                </div>
+                                <div className="flex flex-col w-full h-full px-24 py-10">
+                                    <div className="flex flex-row items-center w-full h-16 gap-4">
+                                        <input 
+                                            className="flex text-center w-28 h-full rounded-2xl focus:outline-none" 
+                                            placeholder={selected.start} 
+                                        />
+                                        <h1>to</h1>
+                                        <input 
+                                            className="flex text-center w-28 h-full rounded-2xl focus:outline-none"
+                                            placeholder={selected.end} 
+                                        />
+                                    </div>
+                                </div>
                             
                             </>
                         ) : (
