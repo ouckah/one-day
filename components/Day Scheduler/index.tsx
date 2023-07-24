@@ -154,9 +154,7 @@ export const DayScheduler = () => {
     }
 
     useEffect(() => {
-        selected?.start ? (
-            selectAppointment(selected.start)
-        ) : (null)
+        selected?.start ? selectAppointment(selected.start) : null
     }, [selected])
 
     return (
@@ -166,21 +164,43 @@ export const DayScheduler = () => {
                 <div className="flex flex-col w-1/2 h-full bg-gray-200 rounded-2xl py-3">
                     <div className="w-full h-full overflow-y-scroll no-scrollbar">
                         {
-                            times.map((time, index) => (
-                                <button 
-                                    className="flex flex-row justify-start items-center w-full h-24 p-5 gap-5 bg-green-500" 
-                                    onClick={(e) => handleAppointment(e, index)} key={index}
-                                >
-                                    <h1>{time}</h1>
-                                    {
-                                        state.startTimes.includes(time) ? (
-                                            <div className="w-5/6 h-full bg-orange-500">
+                            times.map((time, index) => {
 
-                                            </div>
-                                        ) : (<></>)
-                                    }
-                                </button>
-                            ))
+                                // TODO: Fix the sizing of appointment elements
+                                // TODO: for some reason, height > 36 does not work.
+
+                                const sizeToHeight: {[key: number]: string} = {
+                                    1: "20",
+                                    2: "36"
+                                }
+                                const calculateHeight = (appointment: { start: string, end: string, location: string, description: string }) => {
+                                    const startIndex = times.indexOf(appointment.start);
+                                    const endIndex = times.indexOf(appointment.end);
+
+                                    const difference = endIndex - startIndex;
+                                    const height = sizeToHeight[difference];
+                                    return height.toString();
+                                }
+
+                                const isCreated = state.startTimes.includes(time);
+                                const size = isCreated ? calculateHeight(state.appointments[time]) : "20"
+                                const appointmentStyle = "w-5/6 h-" + size + " self-start bg-orange-500";
+                                return (
+                                    <button 
+                                        className="flex flex-row justify-start items-center w-full h-24 p-5 gap-5 bg-green-500" 
+                                        onClick={(e) => handleAppointment(e, index)} key={index}
+                                    >
+                                        <h1>{time}</h1> 
+                                        {
+                                            isCreated ? (
+                                                <div className={appointmentStyle}>
+                                                    <h1>{size}</h1>
+                                                </div>
+                                            ) : (<></>)
+                                        }
+                                    </button>
+                                )
+                            })
                         }
                     </div>
                 </div>
