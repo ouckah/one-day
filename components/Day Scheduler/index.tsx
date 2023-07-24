@@ -20,8 +20,13 @@ export const DayScheduler = () => {
     ];
 
     const [selected, setSelected] = useState<{
-        start: string; end: string 
+        start: string; end: string, location: string, description: string,
     }>();
+    const [selectedStartTime, setSelectedStartTime] = useState("");
+    const [selectedEndTime, setSelectedEndTime] = useState("");
+    const [selectedLocation, setSelectedLocation] = useState("");
+    const [selectedDescription, setSelectedDescription] = useState("");
+
     const [state, setState] = useState<{
         appointments: { [key: string]: { start: string; end: string, location: string, description: string } };
         startTimes: string[];
@@ -88,11 +93,19 @@ export const DayScheduler = () => {
     const selectAppointment = (key: string) => {
         const appointment = state.appointments[key];
         setSelected(appointment);
+        setAppointmentFields(appointment);
     }
-    
+
+    const setAppointmentFields = (data: { start: string; end: string, location: string, description: string }) => {
+        setSelectedStartTime(data.start);
+        setSelectedEndTime(data.end);
+        setSelectedLocation(data.location);
+        setSelectedDescription(data.description);
+    }
+     
     const clearSelectedAppointment = () => {
         if (!selected) return;
-        setSelected({start: '', end: ''});
+        setSelected({start: '', end: '', location: '', description: ''});
     }
 
     const deleteSelectedAppointment = () => {
@@ -123,12 +136,27 @@ export const DayScheduler = () => {
         if (!selected) return;
         const appointmentKey = selected.start;
 
-        // TODO:    save appointment information on selected form to state
-        // TODO:    and update state
+        // update selected appointment
+        const updatedAppointments = state.appointments;
+        updatedAppointments[appointmentKey] = {
+            start: selectedStartTime,
+            end: selectedEndTime,
+            location: selectedLocation,
+            description: selectedDescription
+        };
+
+        // update state
+        setState({
+            ...state,
+            appointments: updatedAppointments,
+        });
+
     }
 
     useEffect(() => {
-        selected ? (selectAppointment(selected.start)) : (null)
+        selected?.start ? (
+            selectAppointment(selected.start)
+        ) : (null)
     }, [selected])
 
     return (
@@ -159,7 +187,7 @@ export const DayScheduler = () => {
 
                 <div className="flex flex-col justify-start items-start w-1/2 h-full bg-gray-200 rounded-2xl p-3">
                     {
-                        selected ? (
+                        selected?.start ? (
                             <>
 
                                 <div className="flex flex-row justify-between items-center w-full h-24 px-5">
@@ -173,12 +201,16 @@ export const DayScheduler = () => {
                                         <Clock />
                                         <input 
                                             className="flex text-center w-1/4 h-full rounded-2xl focus:outline-none" 
-                                            placeholder={selected.start} 
+                                            placeholder={selected.start}
+                                            onChange={(e) => setSelectedStartTime(e.target.value)}
+                                            value={selectedStartTime}
                                         />
                                         <h1>to</h1>
                                         <input 
                                             className="flex text-center w-1/4 h-full rounded-2xl focus:outline-none"
                                             placeholder={selected.end} 
+                                            onChange={(e) => setSelectedEndTime(e.target.value)}
+                                            value={selectedEndTime}
                                         />
                                     </div>
 
@@ -186,7 +218,9 @@ export const DayScheduler = () => {
                                         <MapPin />
                                         <input 
                                             className="flex w-full h-full rounded-2xl p-8 focus:outline-none"
-                                            placeholder={""} 
+                                            placeholder={selected.location}
+                                            onChange={(e) => setSelectedLocation(e.target.value)}
+                                            value={selectedLocation}
                                         />
                                     </div>
 
@@ -194,12 +228,14 @@ export const DayScheduler = () => {
                                         <AlignLeft />
                                         <input 
                                             className="flex w-full h-full rounded-2xl p-8 focus:outline-none"
-                                            placeholder={""} 
+                                            placeholder={selected.description}
+                                            onChange={(e) => setSelectedDescription(e.target.value)}
+                                            value={selectedDescription}
                                         />
                                     </div>
 
                                     <div className="flex flex-row justify-evenly items-center w-full h-16 gap-4">
-                                        <button>Save</button>
+                                        <button onClick={saveSelectedAppointment}>Save</button>
                                         <button>Cancel</button>
                                     </div>
                                 </div>
