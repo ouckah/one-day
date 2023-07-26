@@ -3,6 +3,15 @@ import { useState, MouseEvent, useEffect } from "react";
 import { X, Trash2, Clock, MapPin, AlignLeft } from 'lucide-react';
 
 export const DayScheduler = () => {
+    enum Status {
+        Empty = 0,
+        Red,
+        Orange,
+        Yellow,
+        Blue,
+        Green,  
+    }
+    const NULL_APPOINTMENT_KEY = "NULL";
 
     const times = [
         "0:00",
@@ -18,6 +27,20 @@ export const DayScheduler = () => {
         "5:00",
         "5:30",
     ];
+    const [slots, setSlots] = useState([
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+        { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
+    ])
 
     const [selected, setSelected] = useState<{
         start: string; end: string, location: string, description: string,
@@ -44,13 +67,16 @@ export const DayScheduler = () => {
         ]
     });
 
+    // TODO: have a function that renders appointments + statuses all at once
+    // TODO: current set appointments not being rendered
+
     const handleAppointment = (e: MouseEvent, key: number) => {
         e.preventDefault();
 
-        const time = times[key];
-
-        // check if new appointment
-        if (!state.startTimes.includes(time)) {
+        const slot = slots[key];
+        
+        // check if slot is occupied
+        if (slots[key].status == Status.Empty) {
             const startTime = times[key];
             const endTime = key != times.length - 1 ? times[key + 1] : times[0];
 
@@ -64,6 +90,7 @@ export const DayScheduler = () => {
 
             addAppointment(newAppointment);
         } else {
+            const time = slot.appointmentKey
             selectAppointment(time);
         }
     }
@@ -74,6 +101,17 @@ export const DayScheduler = () => {
     
         // Update the startTimes array with the new start time
         const updatedStartTimes = [...state.startTimes, startTime];
+        
+        // update the slot statuses
+        const startIndex = times.indexOf(appointment[startTime].start);
+        const endIndex = times.indexOf(appointment[startTime].end);
+
+        let updatedSlots = slots;
+        for (let i = startIndex; i < endIndex; i++) {
+            updatedSlots[i].status = Status.Orange;
+            updatedSlots[i].appointmentKey = startTime;
+        }
+        setSlots(updatedSlots);
     
         // Create a new copy of the appointments object with the new appointment added
         const updatedAppointments = {
@@ -111,6 +149,7 @@ export const DayScheduler = () => {
     const deleteSelectedAppointment = () => {
         if (!selected) return;
         const appointmentKey = selected.start;
+        const appointment = state.appointments[appointmentKey];
 
         // delete from appointments
         let updatedAppointments = state.appointments;
@@ -120,6 +159,21 @@ export const DayScheduler = () => {
         let updatedStartTimes = state.startTimes;
         const index = updatedStartTimes.indexOf(appointmentKey);
         updatedStartTimes.splice(index, 1);
+
+        // delete slots (update slot statuses)
+        let updatedSlots = slots;
+        const startTime = appointment.start;
+        const endTime = appointment.end;
+        const startIndex = times.indexOf(startTime);
+        const endIndex = times.indexOf(endTime);
+
+        // set slot range of appointment to empty
+        for (let i = startIndex; i < endIndex; i++) {
+            updatedSlots[i].status = Status.Empty;
+        }
+
+        // update slots state
+        setSlots(updatedSlots);
 
         // update state
         setState({
@@ -145,6 +199,33 @@ export const DayScheduler = () => {
             description: selectedDescription
         };
 
+        // update statuses
+        // get original start and end time
+        const startTime = selected.start;
+        const endTime = selected.end;
+        const startIndex = times.indexOf(startTime);
+        const endIndex = times.indexOf(endTime);
+
+        // get new start and end time
+        const newStartIndex = times.indexOf(selectedStartTime);
+        const newEndIndex = times.indexOf(selectedEndTime);
+
+        let updatedSlots = slots;
+
+        // clear old appointment statuses
+        for (let i = startIndex; i < endIndex; i++) {
+            updatedSlots[i].status = Status.Empty;
+            updatedSlots[i].appointmentKey = NULL_APPOINTMENT_KEY;
+        }
+        // add new appointment statuses
+        for (let i = newStartIndex; i < newEndIndex; i++) {
+            updatedSlots[i].status = Status.Orange;
+            updatedSlots[i].appointmentKey = selectedStartTime;
+        }
+
+        // update status state
+        setSlots(updatedSlots);
+
         // update state
         setState({
             ...state,
@@ -165,26 +246,8 @@ export const DayScheduler = () => {
                     <div className="w-full h-full overflow-y-scroll no-scrollbar">
                         {
                             times.map((time, index) => {
-
-                                // TODO: Fix the sizing of appointment elements
-                                // TODO: for some reason, height > 36 does not work.
-
-                                const sizeToHeight: {[key: number]: string} = {
-                                    1: "20",
-                                    2: "36"
-                                }
-                                const calculateHeight = (appointment: { start: string, end: string, location: string, description: string }) => {
-                                    const startIndex = times.indexOf(appointment.start);
-                                    const endIndex = times.indexOf(appointment.end);
-
-                                    const difference = endIndex - startIndex;
-                                    const height = sizeToHeight[difference];
-                                    return height.toString();
-                                }
-
-                                const isCreated = state.startTimes.includes(time);
-                                const size = isCreated ? calculateHeight(state.appointments[time]) : "20"
-                                const appointmentStyle = "w-5/6 h-" + size + " self-start bg-orange-500";
+                                const isShown = slots[index].status != Status.Empty;
+                                const appointmentStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500";
                                 return (
                                     <button 
                                         className="flex flex-row justify-start items-center w-full h-24 p-5 gap-5 bg-green-500" 
@@ -192,9 +255,9 @@ export const DayScheduler = () => {
                                     >
                                         <h1>{time}</h1> 
                                         {
-                                            isCreated ? (
+                                            isShown ? (
                                                 <div className={appointmentStyle}>
-                                                    <h1>{size}</h1>
+                                                    <h1>{slots[index].status.toString()}</h1>
                                                 </div>
                                             ) : (<></>)
                                         }
