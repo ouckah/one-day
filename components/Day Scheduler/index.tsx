@@ -70,6 +70,8 @@ export const DayScheduler = () => {
     // TODO: have a function that renders appointments + statuses all at once
     // TODO: current set appointments not being rendered
 
+    // TODO: fill in gap between appointments
+
     const handleAppointment = (e: MouseEvent, key: number) => {
         e.preventDefault();
 
