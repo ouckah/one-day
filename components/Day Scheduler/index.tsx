@@ -11,6 +11,12 @@ export const DayScheduler = () => {
         Blue,
         Green,  
     }
+    interface Appointment {
+        start: string,
+        end: string, 
+        location: string, 
+        description: string, 
+    }
     const NULL_APPOINTMENT_KEY = "NULL";
 
     const times = [
@@ -42,18 +48,13 @@ export const DayScheduler = () => {
         { status: Status.Empty, appointmentKey: NULL_APPOINTMENT_KEY },
     ])
 
-    const [selected, setSelected] = useState<{
-        start: string; end: string, location: string, description: string,
-    }>();
+    const [selected, setSelected] = useState<Appointment>();
     const [selectedStartTime, setSelectedStartTime] = useState("");
     const [selectedEndTime, setSelectedEndTime] = useState("");
     const [selectedLocation, setSelectedLocation] = useState("");
     const [selectedDescription, setSelectedDescription] = useState("");
 
-    const [state, setState] = useState<{
-        appointments: { [key: string]: { start: string; end: string, location: string, description: string } };
-        startTimes: string[];
-    }>({
+    const [state, setState] = useState<{ appointments: { [key: string]: Appointment }; }>({
         appointments: {
             "0:00": {
                 start: "0:00",
@@ -62,9 +63,6 @@ export const DayScheduler = () => {
                 description: "Test appointment."
             }
         },
-        startTimes: [
-            "0:00",
-        ]
     });
 
     // TODO: have a function that renders appointments + statuses all at once
@@ -82,7 +80,7 @@ export const DayScheduler = () => {
             const startTime = times[key];
             const endTime = key != times.length - 1 ? times[key + 1] : times[0];
 
-            const newAppointment: { [appointmentKey: string]: { start: string; end: string, location: string, description: string } } = {};
+            const newAppointment: { [appointmentKey: string]: Appointment } = {};
             newAppointment[startTime] = {
                 start: startTime,
                 end: endTime,
@@ -97,12 +95,9 @@ export const DayScheduler = () => {
         }
     }
 
-    const addAppointment = (appointment: { [key: string]: { start: string; end: string, location: string, description: string } }) => {
+    const addAppointment = (appointment: { [appointmentKey: string]: Appointment }) => {
         const startTime = Object.keys(appointment)[0]; // Extract the start time from the keys of the appointment object
         const appointmentContent = appointment[startTime];
-    
-        // Update the startTimes array with the new start time
-        const updatedStartTimes = [...state.startTimes, startTime];
         
         // update the slot statuses
         const startIndex = times.indexOf(appointment[startTime].start);
@@ -124,19 +119,18 @@ export const DayScheduler = () => {
         setState({
             ...state,
             appointments: updatedAppointments,
-            startTimes: updatedStartTimes,
         });
 
         setSelected(appointmentContent);
     };
 
-    const selectAppointment = (key: string) => {
-        const appointment = state.appointments[key];
+    const selectAppointment = (appointmentKey: string) => {
+        const appointment = state.appointments[appointmentKey];
         setSelected(appointment);
         setAppointmentFields(appointment);
     }
 
-    const setAppointmentFields = (data: { start: string; end: string, location: string, description: string }) => {
+    const setAppointmentFields = (data: Appointment) => {
         setSelectedStartTime(data.start);
         setSelectedEndTime(data.end);
         setSelectedLocation(data.location);
@@ -157,11 +151,6 @@ export const DayScheduler = () => {
         let updatedAppointments = state.appointments;
         delete updatedAppointments[appointmentKey];
 
-        // delete from start times
-        let updatedStartTimes = state.startTimes;
-        const index = updatedStartTimes.indexOf(appointmentKey);
-        updatedStartTimes.splice(index, 1);
-
         // delete slots (update slot statuses)
         let updatedSlots = slots;
         const startTime = appointment.start;
@@ -181,7 +170,6 @@ export const DayScheduler = () => {
         setState({
             ...state,
             appointments: updatedAppointments,
-            startTimes: updatedStartTimes
         });
 
         // clear selection
