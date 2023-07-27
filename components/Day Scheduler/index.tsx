@@ -255,6 +255,7 @@ export const DayScheduler = () => {
                             times.map((time, index) => {
                                 const slot = slots[index];
 
+                                // TODO: kinda scuffed code
                                 let appointmentKey, appointment, startTime, endTime;
                                 if (slot.status != Status.Empty) {
                                     appointmentKey = slot.appointmentKey;
@@ -268,6 +269,7 @@ export const DayScheduler = () => {
                                     endTime = times[endIndex - 1];
                                 }
 
+                                // TODO: make this look better
                                 const appointmentBodyStyle = "w-5/6 h-24 self-start bg-" + "orange" + "-500";
                                 const appointmentHeaderStyle = "w-5/6 h-24 self-start bg-" + "orange" + "-500" + " rounded-t-2xl";
                                 const appointmentFooterStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500" + " rounded-b-2xl";
@@ -290,7 +292,7 @@ export const DayScheduler = () => {
                                                         
                                                     </div>
                                                 ) : (
-                                                    
+
                                                     // header
                                                     time == startTime ? 
                                                     (
