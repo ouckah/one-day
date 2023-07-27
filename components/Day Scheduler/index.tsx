@@ -65,11 +65,6 @@ export const DayScheduler = () => {
         },
     });
 
-    // TODO: have a function that renders appointments + statuses all at once
-    // TODO: current set appointments not being rendered
-
-    // TODO: fill in gap between appointments
-
     const handleAppointment = (e: MouseEvent, key: number) => {
         e.preventDefault();
 
@@ -94,6 +89,28 @@ export const DayScheduler = () => {
             selectAppointment(time);
         }
     }
+
+    const renderAppointments = () => {
+        const keys = Object.keys(state.appointments);
+
+        // loop through each appointment in appointments
+        for (const key of keys) {
+            const appointment = state.appointments[key];
+
+            const startTime = appointment.start;
+            const endTime = appointment.end;
+            const startIndex = times.indexOf(startTime);
+            const endIndex = times.indexOf(endTime);
+            
+            // loop through each slot index and set
+            // slot status to active color
+            for (let i = startIndex; i < endIndex; i++) {
+                slots[i].status = Status.Orange;
+                slots[i].appointmentKey = startTime;
+            }
+        }
+    }
+    renderAppointments();
 
     const addAppointment = (appointment: { [appointmentKey: string]: Appointment }) => {
         const startTime = Object.keys(appointment)[0]; // Extract the start time from the keys of the appointment object
@@ -236,19 +253,70 @@ export const DayScheduler = () => {
                     <div className="w-full h-full overflow-y-scroll no-scrollbar">
                         {
                             times.map((time, index) => {
-                                const isShown = slots[index].status != Status.Empty;
-                                const appointmentStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500";
+                                const slot = slots[index];
+
+                                let appointmentKey, appointment, startTime, endTime;
+                                if (slot.status != Status.Empty) {
+                                    appointmentKey = slot.appointmentKey;
+                                    appointment = state.appointments[appointmentKey];
+                                    startTime = appointment.start;
+
+                                    // have to get time before this time, since
+                                    // end time is exclusive in appointment range
+                                    const end = appointment.end;
+                                    const endIndex = times.indexOf(end);
+                                    endTime = times[endIndex - 1];
+                                }
+
+                                const appointmentBodyStyle = "w-5/6 h-24 self-start bg-" + "orange" + "-500";
+                                const appointmentHeaderStyle = "w-5/6 h-24 self-start bg-" + "orange" + "-500" + " rounded-t-2xl";
+                                const appointmentFooterStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500" + " rounded-b-2xl";
+                                const appointmentSingleStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500" + " rounded-t-2xl" + " rounded-b-2xl"
+
                                 return (
                                     <button 
-                                        className="flex flex-row justify-start items-center w-full h-24 p-5 gap-5 bg-green-500" 
+                                        className="flex flex-row justify-start items-start w-full h-24 p-5 gap-5 bg-green-500" 
                                         onClick={(e) => handleAppointment(e, index)} key={index}
                                     >
                                         <h1>{time}</h1> 
                                         {
-                                            isShown ? (
-                                                <div className={appointmentStyle}>
-                                                    <h1>{slots[index].status.toString()}</h1>
-                                                </div>
+                                            slot.status != Status.Empty ? 
+                                            (
+
+                                                // single appointment (full rounded)
+                                                time == startTime && time == endTime ? 
+                                                (
+                                                    <div className={appointmentSingleStyle}>
+                                                        
+                                                    </div>
+                                                ) : (
+                                                    
+                                                    // header
+                                                    time == startTime ? 
+                                                    (
+                                                        <div className={appointmentHeaderStyle}>
+                                                            
+                                                        </div>
+                                                    ) : (
+
+                                                        // footer
+                                                        time == endTime ? 
+                                                        (
+                                                            <div className={appointmentFooterStyle}>
+                                                                
+                                                            </div>
+                                                        ) : 
+
+                                                        // body
+                                                        (
+                                                            <div className={appointmentBodyStyle}>
+                                                                
+                                                            </div>
+                                                        )
+
+                                                    )
+                                                )
+
                                             ) : (<></>)
                                         }
                                     </button>
