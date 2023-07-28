@@ -1,16 +1,10 @@
 'use client'
 import { useState, useEffect, MouseEvent } from "react";
+import { Status } from "@/types/dist";
 import { X, Trash2, Clock, MapPin, AlignLeft, CalendarCheck } from 'lucide-react';
+import { Slot } from "./components/Slot";
 
 export const DayScheduler = () => {
-    enum Status {
-        Empty = 0,
-        Red,
-        Orange,
-        Yellow,
-        Blue,
-        Green,  
-    }
     interface Appointment {
         title: string
         start: string,
@@ -108,13 +102,14 @@ export const DayScheduler = () => {
             
             // loop through each slot index and set
             // slot status to active color
+            let updatedSlots = slots;
             for (let i = startIndex; i < endIndex; i++) {
-                slots[i].status = Status.Orange;
-                slots[i].appointmentKey = startTime;
+                updatedSlots[i].status = Status.Orange;
+                updatedSlots[i].appointmentKey = startTime;
             }
+            setSlots(updatedSlots);
         }
     }
-    renderAppointments();
 
     const addAppointment = (appointment: { [appointmentKey: string]: Appointment }) => {
         const startTime = Object.keys(appointment)[0]; // Extract the start time from the keys of the appointment object
@@ -249,7 +244,11 @@ export const DayScheduler = () => {
 
     useEffect(() => {
         selected?.start ? selectAppointment(selected.start) : null
-    }, [selected])
+    }, [selected]);
+
+    useEffect(() => {
+        renderAppointments();
+    }, []);
 
     return (
         <>
@@ -293,33 +292,41 @@ export const DayScheduler = () => {
 
                                                 // single appointment (full rounded)
                                                 time == startTime && time == endTime ? 
-                                                (
-                                                    <div className={appointmentSingleStyle}>
-                                                        
-                                                    </div>
+                                                (   
+                                                    <Slot 
+                                                        title={appointment!.title}
+                                                        color={slot.status}
+                                                        header
+                                                        footer
+                                                    />
                                                 ) : (
 
                                                     // header
                                                     time == startTime ? 
                                                     (
-                                                        <div className={appointmentHeaderStyle}>
-                                                            
-                                                        </div>
+                                                        <Slot 
+                                                            title={appointment!.title}
+                                                            color={slot.status}
+                                                            header
+                                                        />
                                                     ) : (
 
                                                         // footer
                                                         time == endTime ? 
                                                         (
-                                                            <div className={appointmentFooterStyle}>
-                                                                
-                                                            </div>
+                                                            <Slot 
+                                                                title={appointment!.title}
+                                                                color={slot.status}
+                                                                footer
+                                                            />
                                                         ) : 
 
                                                         // body
                                                         (
-                                                            <div className={appointmentBodyStyle}>
-                                                                
-                                                            </div>
+                                                            <Slot 
+                                                                title={appointment!.title}
+                                                                color={slot.status}
+                                                            />
                                                         )
 
                                                     )
