@@ -1,6 +1,6 @@
 'use client'
-import { useState, MouseEvent, useEffect } from "react";
-import { X, Trash2, Clock, MapPin, AlignLeft } from 'lucide-react';
+import { useState, useEffect, MouseEvent } from "react";
+import { X, Trash2, Clock, MapPin, AlignLeft, CalendarCheck } from 'lucide-react';
 
 export const DayScheduler = () => {
     enum Status {
@@ -12,6 +12,7 @@ export const DayScheduler = () => {
         Green,  
     }
     interface Appointment {
+        title: string
         start: string,
         end: string, 
         location: string, 
@@ -49,6 +50,7 @@ export const DayScheduler = () => {
     ])
 
     const [selected, setSelected] = useState<Appointment>();
+    const [selectedTitle, setSelectedTitle] = useState("");
     const [selectedStartTime, setSelectedStartTime] = useState("");
     const [selectedEndTime, setSelectedEndTime] = useState("");
     const [selectedLocation, setSelectedLocation] = useState("");
@@ -57,6 +59,7 @@ export const DayScheduler = () => {
     const [state, setState] = useState<{ appointments: { [key: string]: Appointment }; }>({
         appointments: {
             "0:00": {
+                title: "Test",
                 start: "0:00",
                 end: "1:00",
                 location: "Somewhere, US",
@@ -77,6 +80,7 @@ export const DayScheduler = () => {
 
             const newAppointment: { [appointmentKey: string]: Appointment } = {};
             newAppointment[startTime] = {
+                title: "Title",
                 start: startTime,
                 end: endTime,
                 location: "",
@@ -148,6 +152,7 @@ export const DayScheduler = () => {
     }
 
     const setAppointmentFields = (data: Appointment) => {
+        setSelectedTitle(data.title);
         setSelectedStartTime(data.start);
         setSelectedEndTime(data.end);
         setSelectedLocation(data.location);
@@ -156,7 +161,7 @@ export const DayScheduler = () => {
      
     const clearSelectedAppointment = () => {
         if (!selected) return;
-        setSelected({start: '', end: '', location: '', description: ''});
+        setSelected({title: '', start: '', end: '', location: '', description: ''});
     }
 
     const deleteSelectedAppointment = () => {
@@ -200,6 +205,7 @@ export const DayScheduler = () => {
         // update selected appointment
         const updatedAppointments = state.appointments;
         updatedAppointments[appointmentKey] = {
+            title: selectedTitle,
             start: selectedStartTime,
             end: selectedEndTime,
             location: selectedLocation,
@@ -249,7 +255,7 @@ export const DayScheduler = () => {
         <>
             <div className="flex flex-row w-full h-full bg-black">
                 
-                <div className="flex flex-col w-1/2 h-full bg-gray-200 rounded-2xl py-3">
+                <div className="flex flex-col w-1/2 h-full bg-white">
                     <div className="w-full h-full overflow-y-scroll no-scrollbar">
                         {
                             times.map((time, index) => {
@@ -277,7 +283,7 @@ export const DayScheduler = () => {
 
                                 return (
                                     <button 
-                                        className="flex flex-row justify-start items-start w-full h-24 p-5 gap-5 bg-green-500" 
+                                        className="flex flex-row justify-start items-start w-full h-24 p-5 gap-5 white" 
                                         onClick={(e) => handleAppointment(e, index)} key={index}
                                     >
                                         <h1>{time}</h1> 
@@ -328,14 +334,18 @@ export const DayScheduler = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-start items-start w-1/2 h-full bg-gray-200 rounded-2xl p-3">
+                <div className="flex flex-col justify-start items-start w-1/2 h-full bg-gray-200 p-3">
                     {
                         selected?.start ? (
                             <>
 
                                 <div className="flex flex-row justify-between items-center w-full h-24 px-5">
                                     <X className="cursor-pointer" onClick={clearSelectedAppointment}/>
-                                    <input className="w-1/2 h-12 bg-gray-200 border-b-gray-500 border-b-2 text-gray-500 text-lg font-bold p-3 focus:outline-none"/>
+                                    <input 
+                                        className="w-1/2 h-12 bg-gray-200 border-b-gray-500 border-b-2 text-gray-500 text-lg font-bold p-3 focus:outline-none"
+                                        onChange={(e) => setSelectedTitle(e.target.value)}
+                                        value={selectedTitle}
+                                    />
                                     <Trash2 className="cursor-pointer" onClick={deleteSelectedAppointment}/>
                                 </div>
 
@@ -386,8 +396,28 @@ export const DayScheduler = () => {
                             </>
                         ) : (
                             <>
-                            
-                                <h1>none.</h1>
+
+                                <div className="flex flex-col justify-center items-center text-center font-light text-gray-600 gap-16 w-full h-full">
+                                    {/* TODO: Add hex value to color */}
+                                    <div className="flex flex-col">
+                                        <CalendarCheck size={256} color="gray" />
+
+                                        <h1>
+                                            Schedule your day, or bring <br />
+                                            in a premade template!
+                                        </h1>
+                                    </div>
+
+                                    <div className="flex flex-row justify-evenly items-center gap-5">
+                                        <button className="bg-orange-300 text-white text-xl font-bold uppercase rounded-2xl py-3 px-5">
+                                            Use Day
+                                        </button>
+
+                                        <button className="bg-white text-gray-600 text-xl font-bold uppercase rounded-2xl py-3 px-8">
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
                             
                             </>
                         )
