@@ -103,10 +103,12 @@ export const DayScheduler = () => {
             // loop through each slot index and set
             // slot status to active color
             let updatedSlots = slots;
+
             for (let i = startIndex; i < endIndex; i++) {
                 updatedSlots[i].status = Status.Orange;
                 updatedSlots[i].appointmentKey = startTime;
             }
+
             setSlots(updatedSlots);
         }
     }
@@ -196,21 +198,12 @@ export const DayScheduler = () => {
     const saveSelectedAppointment = () => {
         if (!selected) return;
         const appointmentKey = selected.start;
-
-        // update selected appointment
-        const updatedAppointments = state.appointments;
-        updatedAppointments[appointmentKey] = {
-            title: selectedTitle,
-            start: selectedStartTime,
-            end: selectedEndTime,
-            location: selectedLocation,
-            description: selectedDescription
-        };
+        const appointment = state.appointments[appointmentKey];
 
         // update statuses
         // get original start and end time
-        const startTime = selected.start;
-        const endTime = selected.end;
+        const startTime = appointment.start;
+        const endTime = appointment.end;
         const startIndex = times.indexOf(startTime);
         const endIndex = times.indexOf(endTime);
 
@@ -234,6 +227,16 @@ export const DayScheduler = () => {
         // update status state
         setSlots(updatedSlots);
 
+        // update selected appointment
+        const updatedAppointments = state.appointments;
+        updatedAppointments[appointmentKey] = {
+            title: selectedTitle,
+            start: selectedStartTime,
+            end: selectedEndTime,
+            location: selectedLocation,
+            description: selectedDescription
+        };
+
         // update state
         setState({
             ...state,
@@ -249,6 +252,11 @@ export const DayScheduler = () => {
     useEffect(() => {
         renderAppointments();
     }, []);
+    useEffect(() => {
+        renderAppointments();
+        console.log(state.appointments);
+        console.log(slots)
+    }, [state.appointments]);
 
     return (
         <>
@@ -273,12 +281,6 @@ export const DayScheduler = () => {
                                     const endIndex = times.indexOf(end);
                                     endTime = times[endIndex - 1];
                                 }
-
-                                // TODO: make this look better
-                                const appointmentBodyStyle = "w-5/6 h-24 self-start bg-" + "orange" + "-500";
-                                const appointmentHeaderStyle = "w-5/6 h-24 self-start bg-" + "orange" + "-500" + " rounded-t-2xl";
-                                const appointmentFooterStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500" + " rounded-b-2xl";
-                                const appointmentSingleStyle = "w-5/6 h-20 self-start bg-" + "orange" + "-500" + " rounded-t-2xl" + " rounded-b-2xl"
 
                                 return (
                                     <button 
