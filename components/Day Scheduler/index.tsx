@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, MouseEvent } from "react";
-import { Status } from "@/types/dist";
+import { Status } from "../../types/scheduler";
 import { X, Trash2, Clock, MapPin, AlignLeft, CalendarCheck } from 'lucide-react';
 import { Slot } from "./components/Slot";
 
@@ -8,9 +8,9 @@ export const DayScheduler = () => {
     interface Appointment {
         title: string
         start: string,
-        end: string, 
-        location: string, 
-        description: string, 
+        end: string,
+        location: string,
+        description: string,
     }
     const NULL_APPOINTMENT_KEY = "NULL";
 
@@ -66,7 +66,7 @@ export const DayScheduler = () => {
         e.preventDefault();
 
         const slot = slots[key];
-        
+
         // check if slot is occupied
         if (slots[key].status == Status.Empty) {
             const startTime = times[key];
@@ -99,7 +99,7 @@ export const DayScheduler = () => {
             const endTime = appointment.end;
             const startIndex = times.indexOf(startTime);
             const endIndex = times.indexOf(endTime);
-            
+
             // loop through each slot index and set
             // slot status to active color
             let updatedSlots = slots;
@@ -116,7 +116,7 @@ export const DayScheduler = () => {
     const addAppointment = (appointment: { [appointmentKey: string]: Appointment }) => {
         const startTime = Object.keys(appointment)[0]; // Extract the start time from the keys of the appointment object
         const appointmentContent = appointment[startTime];
-        
+
         // update the slot statuses
         const startIndex = times.indexOf(appointment[startTime].start);
         const endIndex = times.indexOf(appointment[startTime].end);
@@ -127,13 +127,13 @@ export const DayScheduler = () => {
             updatedSlots[i].appointmentKey = startTime;
         }
         setSlots(updatedSlots);
-    
+
         // Create a new copy of the appointments object with the new appointment added
         const updatedAppointments = {
             ...state.appointments,
             ...appointment,
         };
-    
+
         setState({
             ...state,
             appointments: updatedAppointments,
@@ -155,10 +155,10 @@ export const DayScheduler = () => {
         setSelectedLocation(data.location);
         setSelectedDescription(data.description);
     }
-     
+
     const clearSelectedAppointment = () => {
         if (!selected) return;
-        setSelected({title: '', start: '', end: '', location: '', description: ''});
+        setSelected({ title: '', start: '', end: '', location: '', description: '' });
     }
 
     const deleteSelectedAppointment = () => {
@@ -261,7 +261,7 @@ export const DayScheduler = () => {
     return (
         <>
             <div className="flex flex-row w-full h-full bg-black">
-                
+
                 <div className="flex flex-col w-1/2 h-full bg-white">
                     <div className="w-full h-full overflow-y-scroll no-scrollbar">
                         {
@@ -269,7 +269,7 @@ export const DayScheduler = () => {
                                 const slot = slots[index];
 
                                 // TODO: kinda scuffed code
-                                let appointmentKey, appointment, startTime, endTime;
+                                let appointmentKey, appointment: Appointment, startTime, endTime;
                                 if (slot.status != Status.Empty) {
                                     appointmentKey = slot.appointmentKey;
                                     appointment = state.appointments[appointmentKey];
@@ -283,58 +283,58 @@ export const DayScheduler = () => {
                                 }
 
                                 return (
-                                    <button 
-                                        className="flex flex-row justify-start items-start w-full h-24 p-5 gap-5 white" 
+                                    <button
+                                        className="flex flex-row justify-start items-start w-full h-24 p-5 gap-5 white"
                                         onClick={(e) => handleAppointment(e, index)} key={index}
                                     >
-                                        <h1>{time}</h1> 
+                                        <h1>{time}</h1>
                                         {
-                                            slot.status != Status.Empty ? 
-                                            (
+                                            slot.status != Status.Empty ?
+                                                (
 
-                                                // single appointment (full rounded)
-                                                time == startTime && time == endTime ? 
-                                                (   
-                                                    <Slot 
-                                                        title={appointment!.title}
-                                                        color={slot.status}
-                                                        header
-                                                        footer
-                                                    />
-                                                ) : (
-
-                                                    // header
-                                                    time == startTime ? 
-                                                    (
-                                                        <Slot 
-                                                            title={appointment!.title}
-                                                            color={slot.status}
-                                                            header
-                                                        />
-                                                    ) : (
-
-                                                        // footer
-                                                        time == endTime ? 
+                                                    // single appointment (full rounded)
+                                                    time == startTime && time == endTime ?
                                                         (
-                                                            <Slot 
+                                                            <Slot
                                                                 title={appointment!.title}
                                                                 color={slot.status}
+                                                                header
                                                                 footer
                                                             />
-                                                        ) : 
+                                                        ) : (
 
-                                                        // body
-                                                        (
-                                                            <Slot 
-                                                                title={appointment!.title}
-                                                                color={slot.status}
-                                                            />
+                                                            // header
+                                                            time == startTime ?
+                                                                (
+                                                                    <Slot
+                                                                        title={appointment!.title}
+                                                                        color={slot.status}
+                                                                        header
+                                                                    />
+                                                                ) : (
+
+                                                                    // footer
+                                                                    time == endTime ?
+                                                                        (
+                                                                            <Slot
+                                                                                title={appointment!.title}
+                                                                                color={slot.status}
+                                                                                footer
+                                                                            />
+                                                                        ) :
+
+                                                                        // body
+                                                                        (
+                                                                            <Slot
+                                                                                title={appointment!.title}
+                                                                                color={slot.status}
+                                                                            />
+                                                                        )
+
+                                                                )
                                                         )
 
-                                                    )
-                                                )
-
-                                            ) : (<></>)
+                                                ) : (<></>)
                                         }
                                     </button>
                                 )
@@ -349,28 +349,28 @@ export const DayScheduler = () => {
                             <>
 
                                 <div className="flex flex-row justify-between items-center w-full h-24 px-5">
-                                    <X className="cursor-pointer" onClick={clearSelectedAppointment}/>
-                                    <input 
+                                    <X className="cursor-pointer" onClick={clearSelectedAppointment} />
+                                    <input
                                         className="w-1/2 h-12 bg-gray-200 border-b-gray-500 border-b-2 text-gray-500 text-lg font-bold p-3 focus:outline-none"
                                         onChange={(e) => setSelectedTitle(e.target.value)}
                                         value={selectedTitle}
                                     />
-                                    <Trash2 className="cursor-pointer" onClick={deleteSelectedAppointment}/>
+                                    <Trash2 className="cursor-pointer" onClick={deleteSelectedAppointment} />
                                 </div>
 
                                 <div className="flex flex-col w-full h-full px-24 py-10 gap-10">
                                     <div className="flex flex-row items-center w-full h-16 gap-4">
                                         <Clock />
-                                        <input 
-                                            className="flex text-center w-1/4 h-full rounded-2xl focus:outline-none" 
+                                        <input
+                                            className="flex text-center w-1/4 h-full rounded-2xl focus:outline-none"
                                             placeholder={selected.start}
                                             onChange={(e) => setSelectedStartTime(e.target.value)}
                                             value={selectedStartTime}
                                         />
                                         <h1>to</h1>
-                                        <input 
+                                        <input
                                             className="flex text-center w-1/4 h-full rounded-2xl focus:outline-none"
-                                            placeholder={selected.end} 
+                                            placeholder={selected.end}
                                             onChange={(e) => setSelectedEndTime(e.target.value)}
                                             value={selectedEndTime}
                                         />
@@ -378,7 +378,7 @@ export const DayScheduler = () => {
 
                                     <div className="flex flex-row items-center w-full h-16 gap-4">
                                         <MapPin />
-                                        <input 
+                                        <input
                                             className="flex w-full h-full rounded-2xl p-8 focus:outline-none"
                                             placeholder={selected.location}
                                             onChange={(e) => setSelectedLocation(e.target.value)}
@@ -388,7 +388,7 @@ export const DayScheduler = () => {
 
                                     <div className="flex flex-row items-start w-full h-16 gap-4">
                                         <AlignLeft />
-                                        <input 
+                                        <input
                                             className="flex w-full h-full rounded-2xl p-8 focus:outline-none"
                                             placeholder={selected.description}
                                             onChange={(e) => setSelectedDescription(e.target.value)}
@@ -401,7 +401,7 @@ export const DayScheduler = () => {
                                         <button>Cancel</button>
                                     </div>
                                 </div>
-                            
+
                             </>
                         ) : (
                             <>
@@ -427,12 +427,12 @@ export const DayScheduler = () => {
                                         </button>
                                     </div>
                                 </div>
-                            
+
                             </>
                         )
                     }
                 </div>
-            
+
             </div>
         </>
     )
