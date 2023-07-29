@@ -1,6 +1,6 @@
 'use client'
 
-import { Status } from "@/types/dist";
+import { Status } from "../../../../types/scheduler";
 
 export const Slot = ({ title, color, header, footer }: {
     title: string,
@@ -15,7 +15,7 @@ export const Slot = ({ title, color, header, footer }: {
     const backgroundColor = color as string;
     return (
         <>
-            
+
             {/* Single Appointment (full rounded) */}
             {
                 header && footer &&
@@ -55,7 +55,7 @@ export const Slot = ({ title, color, header, footer }: {
                 !header && footer &&
                 <>
                     <div className={`flex flex-row justify-start w-5/6 h-20 bg-${backgroundColor}-200 rounded-b-2xl`}>
-                        
+
                     </div>
                 </>
             }
@@ -71,4 +71,16 @@ export const Slot = ({ title, color, header, footer }: {
             }
         </>
     )
+}
+
+function getColorStyle(status: Status) {
+    switch (status) {
+        case Status.Red:
+        case Status.Orange:
+        case Status.Yellow:
+        case Status.Blue:
+        case Status.Green:
+        case Status.Empty:
+        default: return "";
+    }
 }
