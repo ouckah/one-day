@@ -1,4 +1,4 @@
-import { DayScheduler } from "@/components/Day Scheduler";
+import DayScheduler from "@/components/DayScheduler";
 
 export default function Home() {
   return (
