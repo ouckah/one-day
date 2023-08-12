@@ -2,15 +2,13 @@
 //using immutable to help with not causing state side affects with updating state
 // spread operator doesn't work if spreading reference types (anything outside a primitive)
 import { Map as ImmutableMap } from "immutable";
-import { useState, useEffect, MouseEvent } from "react";
+import { useState, useEffect } from "react";
 import { Appointment, SlotState, Status } from "@/types/scheduler";
 import { isNull, notNull } from "@/utils";
 import { X, Trash2, Clock, MapPin, AlignLeft, CalendarCheck } from 'lucide-react';
 import Slot from "./Slot";
 
 export default function DayScheduler(): JSX.Element {
-    const NULL_APPOINTMENT_KEY = "NULL";
-
     const DEFAULT_APPOINTMENT: Appointment = {
         title: "Title",
         start: "",
@@ -115,7 +113,7 @@ export default function DayScheduler(): JSX.Element {
         setState(state.remove(selectedAppointment.start));
     }
 
-    function onAppUpdate(update: Appointment) {
+    function onAppointmentUpdate(update: Appointment) {
         if (isNull(selectedAppointment)) return;
 
         const oldStartIndex = times.indexOf(selectedAppointment.start);
@@ -145,6 +143,8 @@ export default function DayScheduler(): JSX.Element {
         setState(state.set(update.start, { ...update }));
     }
 
+    useEffect(() => {}, [selectedAppointment])
+
     return (
         <>
             <div className="flex flex-row w-full h-full bg-black">
@@ -172,10 +172,10 @@ export default function DayScheduler(): JSX.Element {
                 <div className="flex flex-col justify-start items-start w-1/2 h-full bg-gray-200 p-3">
                     {notNull(selectedAppointment) ?
                         <EditTray
-                            app={selectedAppointment}
+                            appointment={selectedAppointment}
                             onDeselect={() => setSelectedAppointment(undefined)}
                             onDelete={onAppointmentDelete}
-                            onSave={onAppUpdate}
+                            onSave={onAppointmentUpdate}
                         /> :
                         <DefaultTray onUseDate={onTrayUseDay} onSave={onTraySave} />
                     }
@@ -187,18 +187,30 @@ export default function DayScheduler(): JSX.Element {
 }
 
 interface EditTrayProps {
-    app: Appointment,
+    appointment: Appointment,
     onDeselect: () => void,
     onDelete: () => void,
     onSave: (app: Appointment) => void
 }
 
-function EditTray({ app, onDeselect, onDelete, onSave }: EditTrayProps): JSX.Element {
-    const [title, setTitle] = useState(app.title);
-    const [start, setStart] = useState(app.start);
-    const [end, setEnd] = useState(app.end);
-    const [description, setDescription] = useState(app.description);
-    const [location, setLocation] = useState(app.location);
+function EditTray({ appointment, onDeselect, onDelete, onSave }: EditTrayProps): JSX.Element {
+    const [title, setTitle] = useState(appointment.title);
+    const [start, setStart] = useState(appointment.start);
+    const [end, setEnd] = useState(appointment.end);
+    const [description, setDescription] = useState(appointment.description);
+    const [location, setLocation] = useState(appointment.location);
+
+    // update appointment input boxes whenever
+    // new slot / appointment is selected
+    // ! SOLVED USING CHATGPT
+    // possibly could lead to double renders, temp code
+    useEffect(() => {
+        setTitle(appointment.title);
+        setStart(appointment.start);
+        setEnd(appointment.end);
+        setDescription(appointment.description);
+        setLocation(appointment.location);
+    }, [appointment]);
 
     /*
       TODO: input validation should probably happen to make sure the times are valid times.
