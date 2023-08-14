@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { signOut } from "next-auth/react"
+
 import { Home, CalendarPlus, Settings } from 'lucide-react';
 
 export const SideMenu = () => {
@@ -47,6 +49,7 @@ export const SideMenu = () => {
                         </Link>
                     ))
                 }
+                <button onClick={() => signOut()}>Sign Out</button>
 
             </div>
         </>
